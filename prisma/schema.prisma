@@ -1,0 +1,169 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  //url      = "sqlserver://TEMUCO/TEMUCO:1433;database=arrigoni_nfu_db;user=as;password=Inf328980;trustServerCertificate=true"
+  url      = "sqlserver://BRYAN-DESKTOP:1433;database=arrigoni_nfu_db;user=arrigoni;password=85656355;trustServerCertificate=true"
+}
+
+model UserTypes {
+  id        Int       @unique(map: "id") @default(autoincrement()) @db.Int
+  name      String    @db.VarChar(255)
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  users     Users[]
+}
+
+model Users {
+  userId    Int          @unique(map: "userId") @default(autoincrement()) @db.Int
+  firstName String       @db.VarChar(255)
+  lastName  String       @db.VarChar(255)
+  role      String       @default("") @db.VarChar(255)
+  email     String       @unique(map: "email") @db.VarChar(255)
+  password  String       @db.VarChar(255)
+  granelTag GranelTags[]
+  companyId Int          @default(1) @db.Int
+  company   Companies    @relation(fields: [companyId], references: [companyId])
+  type      Int          @db.Int
+  userType  UserTypes    @relation(fields: [type], references: [id])
+  documents Documents[]
+  createdAt DateTime?    @default(now()) @map("created_at")
+  updatedAt DateTime?    @updatedAt @map("updated_at")
+  deletedAt DateTime?    @map("deleted_at")
+}
+
+model Companies {
+  companyId Int         @unique(map: "companyId") @default(autoincrement()) @db.Int
+  name      String      @db.VarChar(255)
+  rut       String      @unique(map: "rut") @db.VarChar(255)
+  address   String?     @db.VarChar(255)
+  createdAt DateTime?   @default(now()) @map("created_at")
+  updatedAt DateTime?   @updatedAt @map("updated_at")
+  deletedAt DateTime?   @map("deleted_at")
+  documents Documents[]
+  users     Users[]
+}
+
+model Documents {
+  documentId  Int             @unique(map: "documentId") @default(autoincrement()) @db.Int
+  guia        String          @db.VarChar(255)
+  weight      Float?          @db.Float
+  egressDate  DateTime?       @map("egress_date")
+  ingressDate DateTime?       @map("ingress_date")
+  user2Id     Int?            @db.Int
+  stateId     Int             @db.Int
+  state       DocumentStates  @relation(fields: [stateId], references: [documentStateId])
+  companyId   Int             @db.Int
+  company     Companies       @relation(fields: [companyId], references: [companyId], onUpdate: NoAction, onDelete: NoAction)
+  userId      Int             @db.Int
+  user        Users           @relation(fields: [userId], references: [userId])
+  observation String?         @db.VarChar(255)
+  items       DocumentItems[]
+  createdAt   DateTime?       @default(now()) @map("created_at")
+  updatedAt   DateTime?       @updatedAt @map("updated_at")
+  deletedAt   DateTime?       @map("deleted_at")
+}
+
+model DocumentStates {
+  documentStateId Int         @unique(map: "documentStateId") @default(autoincrement()) @db.Int
+  name            String      @db.VarChar(255)
+  documents       Documents[]
+  createdAt       DateTime?   @default(now()) @map("created_at")
+  updatedAt       DateTime?   @updatedAt @map("updated_at")
+  deletedAt       DateTime?   @map("deleted_at")
+}
+
+model DocumentItems {
+  documentItemId Int                 @unique(map: "documentItemId") @default(autoincrement()) @db.Int
+  typeId         Int                 @db.Int
+  type           DocumentItemsTypes  @relation(fields: [typeId], references: [documentItemTypeId])
+  matricula      String?             @db.VarChar(255)
+  fuego          String?             @db.VarChar(255)
+  stateId        Int                 @db.Int
+  state          DocumentItemsStates @relation(fields: [stateId], references: [documentItemStateId])
+  documentId     Int                 @db.Int
+  document       Documents           @relation(fields: [documentId], references: [documentId], onUpdate: NoAction, onDelete: NoAction)
+  cuts           Cuts[]
+  createdAt      DateTime?           @default(now()) @map("created_at")
+  updatedAt      DateTime?           @updatedAt @map("updated_at")
+  deletedAt      DateTime?           @map("deleted_at")
+}
+
+model DocumentItemsTypes {
+  documentItemTypeId Int             @unique(map: "documentItemTypeId") @default(autoincrement()) @db.Int
+  name               String          @db.VarChar(255)
+  documents          DocumentItems[]
+  createdAt          DateTime?       @default(now()) @map("created_at")
+  updatedAt          DateTime?       @updatedAt @map("updated_at")
+  deletedAt          DateTime?       @map("deleted_at")
+}
+
+model DocumentItemsStates {
+  documentItemStateId Int             @unique(map: "documentItemStateId") @default(autoincrement()) @db.Int
+  name                String          @db.VarChar(255)
+  documents           DocumentItems[]
+  createdAt           DateTime?       @default(now()) @map("created_at")
+  updatedAt           DateTime?       @updatedAt @map("updated_at")
+  deletedAt           DateTime?       @map("deleted_at")
+}
+
+model Cuts {
+  cutId          Int           @unique(map: "cutId") @default(autoincrement()) @db.Int
+  cutNumber      Int           @db.Int
+  cutWeight      Float?        @db.Float
+  cutStateId     Int           @default(1) @db.Int
+  cutState       CutsStates    @relation(fields: [cutStateId], references: [cutStateId])
+  cutDate        DateTime?     @map("cut_date")
+  documentItemId Int           @db.Int
+  documentItem   DocumentItems @relation(fields: [documentItemId], references: [documentItemId])
+  inReactor      Boolean       @default(false) @db.Bit
+  reactorId      Int?          @db.Int
+  reactor        Reactors?     @relation(fields: [reactorId], references: [reactorId])
+  createdAt      DateTime?     @default(now()) @map("created_at")
+  updatedAt      DateTime?     @updatedAt @map("updated_at")
+  deletedAt      DateTime?     @map("deleted_at")
+}
+
+model CutsStates {
+  cutStateId Int       @unique(map: "cutStateId") @default(autoincrement()) @db.Int
+  name       String    @db.VarChar(255)
+  cuts       Cuts[]
+  createdAt  DateTime? @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+}
+
+model Reactors {
+  reactorId Int          @unique(map: "reactorId") @default(autoincrement()) @db.Int
+  name      String       @db.VarChar(255)
+  closed    Boolean      @default(false) @db.Bit
+  cuts      Cuts[]
+  granelTag GranelTags[]
+  createdAt DateTime?    @default(now()) @map("created_at")
+  updatedAt DateTime?    @updatedAt @map("updated_at")
+  deletedAt DateTime?    @map("deleted_at")
+}
+
+model GranelTags {
+  granelTagId Int       @unique(map: "granelTagId") @default(autoincrement()) @db.Int
+  peso        Float     @db.Float
+  type        String    @default("granel") @db.VarChar(255)
+  procesed    Boolean   @default(false) @db.Bit
+  inReactor   Boolean   @default(false) @db.Bit
+  reactorId   Int?      @db.Int
+  reactor     Reactors? @relation(fields: [reactorId], references: [reactorId])
+  userId      Int       @db.Int
+  user        Users?    @relation(fields: [userId], references: [userId])
+  createdAt   DateTime? @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+}
