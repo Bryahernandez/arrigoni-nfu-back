@@ -18,6 +18,7 @@ export const getDocuments = async (req: Request, res: Response) => {
 
 export const getDocumentsClientSummary = async (req: Request, res: Response) => {
     const currentDate = new Date();
+    currentDate.setMonth(currentDate.getMonth() - 3)
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
     const documents = await Document.findMany(
@@ -56,6 +57,7 @@ export const getDocumentsClientSummary = async (req: Request, res: Response) => 
 
 export const getDocumentsProducerSummary = async (req: Request, res: Response) => {
     const currentDate = new Date();
+    currentDate.setMonth(currentDate.getMonth() - 3)
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const { id } = req.params;
     const documents = await Document.findMany(
