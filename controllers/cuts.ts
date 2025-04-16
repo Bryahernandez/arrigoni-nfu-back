@@ -130,7 +130,6 @@ export const putCut = async (req: Request, res: Response) => {
             },
             data: {
                 cutNumber: body.cutNumber,
-                cutDate: new Date(body.cutDate),
                 cutWeight: body.cutWeight,
                 documentItemId: body.documentItemId,
                 inReactor: body.inReactor,
